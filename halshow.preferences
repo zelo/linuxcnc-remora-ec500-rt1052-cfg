@@ -1,0 +1,22 @@
+# Halshow settings
+# This file is generated automatically.
+wm geometry . 1276x2087+960+0
+placeFrames 0.3
+set ::ratio 0.3
+set ::old_w_leftf 160
+set ::watchlist {
+    pin+estop-latch.0.fault-in
+    pin+estop-latch.0.fault-out
+    pin+estop-latch.0.ok-in
+    pin+estop-latch.0.ok-out
+    pin+and2.0.in0
+    pin+and2.0.in1
+    pin+and2.0.out
+}
+set ::workmode watchhal
+set ::watchInterval 100
+set ::col1_width 100
+set ::ffmts 
+set ::ifmts 
+set ::alwaysOnTop 0
+set ::autoSaveWatchlist 1

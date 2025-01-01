@@ -1,0 +1,119 @@
+# Basic HAL config file for NVEM controller board running Remora firmware
+# Configured for 3 joints (A, Y, Z axes) with home and limit switches
+
+loadrt [KINS]KINEMATICS
+loadrt [EMCMOT]EMCMOT base_period_nsec=[EMCMOT]BASE_PERIOD servo_period_nsec=[EMCMOT]SERVO_PERIOD num_joints=[KINS]JOINTS
+
+
+##########
+# REMORA #
+##########
+
+# load the Remora real-time component
+
+	loadrt remora-eth-3.0 PRU_base_freq=500000
+
+
+# estop and SPI comms enable and feedback
+
+	loadrt estop_latch
+	loadrt and2
+	
+	net button-estop <= and2.0.in0 <= remora.input.05.not
+	net estop-status <= estop-latch.0.ok-in <= and2.0.out
+
+
+	net user-enable-out	<= and2.0.in1 <= 	iocontrol.0.user-enable-out	=>	remora.enable
+	net user-request-enable	<=	iocontrol.0.user-request-enable	=>	remora.reset
+	net remora-status	<=	remora.status			=>	iocontrol.0.emc-enable-in
+
+	addf and2.0					servo-thread
+
+
+
+
+# add the remora and motion functions to threads
+
+	addf remora.read 		servo-thread
+	addf motion-command-handler 	servo-thread
+	addf motion-controller 		servo-thread
+	addf remora.update-freq 	servo-thread
+	addf remora.write 		servo-thread
+
+########
+# AXES #
+########
+
+
+# joint 0 setup (X axis)
+
+	setp remora.joint.0.scale 	[JOINT_0]SCALE
+	setp remora.joint.0.maxaccel 	[JOINT_0]STEPGEN_MAXACCEL
+	setp remora.joint.0.pgain	[JOINT_0]PGAIN
+
+	net j0pos-cmd 		joint.0.motor-pos-cmd	=>	remora.joint.0.pos-cmd
+	net j0pos-fb 		remora.joint.0.pos-fb	=>	joint.0.motor-pos-fb
+	net j0enable 		joint.0.amp-enable-out	=>	remora.joint.0.enable
+
+
+# joint 1 setup (Y axis)
+
+	setp remora.joint.1.scale 	[JOINT_1]SCALE
+	setp remora.joint.1.maxaccel	[JOINT_1]STEPGEN_MAXACCEL
+	setp remora.joint.1.pgain	[JOINT_1]PGAIN
+
+	net j1pos-cmd 		joint.1.motor-pos-cmd	=>	remora.joint.1.pos-cmd
+	net j1pos-fb 		remora.joint.1.pos-fb	=>	joint.1.motor-pos-fb
+	net j1enable 		joint.1.amp-enable-out	=>	remora.joint.1.enable
+
+
+# joint 2 setup (Z axis)
+
+	setp remora.joint.2.scale 	[JOINT_2]SCALE
+	setp remora.joint.2.maxaccel 	[JOINT_2]STEPGEN_MAXACCEL
+	setp remora.joint.2.pgain	[JOINT_2]PGAIN
+
+	net j2pos-cmd		joint.2.motor-pos-cmd	=>	remora.joint.2.pos-cmd
+	net j2pos-fb		remora.joint.2.pos-fb	=>	joint.2.motor-pos-fb
+	net j2enable		joint.2.amp-enable-out	=>	remora.joint.2.enable
+	
+# joint 3 setup (A axis)
+
+	setp remora.joint.3.scale	[JOINT_3]SCALE
+	setp remora.joint.3.maxaccel	[JOINT_3]STEPGEN_MAXACCEL
+	setp remora.joint.3.pgain	[JOINT_3]PGAIN
+
+	net j3pos-cmd 		joint.3.motor-pos-cmd	=>	remora.joint.3.pos-cmd
+	net j3pos-fb 		remora.joint.3.pos-fb	=>	joint.3.motor-pos-fb
+	net j3enable 		joint.3.amp-enable-out	=>	remora.joint.3.enable
+	
+###########
+# Spindle #
+###########
+
+# Spindle Speed Control
+net spindle-cw remora.SP.1   # Spindle CW (clockwise) speed signal from LinuxCNC to Remora
+
+# Spindle Forward/Reverse Control
+net spindle-fwd spindle.0.forward => remora.output.00   # Map spindle forward command to FWD pin
+net spindle-rev spindle.0.reverse => remora.output.01   # Map spindle reverse command to REV pin
+
+# Load and configure PWM generator
+loadrt pwmgen output_type=1  # Load PWM generator (type 1: PWM output)
+loadrt scale count=1         # Load 1 scaling component
+loadrt lowpass count=1       # Load 1 low-pass filter
+loadrt abs count=1           # Load 1 absolute value component
+
+# Add components to servo thread
+addf scale.0 servo-thread     # Add scaling component to servo thread
+addf lowpass.0 servo-thread   # Add low-pass filter to servo thread
+addf abs.0 servo-thread       # Add absolute value component to servo thread
+
+# Configure scaling for spindle RPM to voltage
+setp scale.0.gain 0.00416666667   # Gain for RPM to voltage scaling (e.g., 24000 RPM = 10V)
+
+# Map spindle speed command to scaled output
+net spindle-cmd-rpm spindle.0.speed-out => scale.0.in       # Map spindle speed to scaling input
+net spindle-cmd-rpm-abs scale.0.out => abs.0.in             # Get absolute value of scaled output
+net spindle-speed-DAC abs.0.out => remora.SP.0              # Send scaled and filtered speed to Remora SP.0
+
