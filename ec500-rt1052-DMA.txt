@@ -148,7 +148,7 @@
 	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"IN05",
+		"Comment":			"IN05 - Input IN01 (EMERGENCY STOP BUTTON)",
 		"Pin":				"P3_18",
 		"Mode":				"Input",
 		"Data Bit":			8,
@@ -365,7 +365,7 @@
 	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"OT01",
+		"Comment":			"OT01 - Spindle Output 1 (FWD)",
 		"Pin":				"P3_12",
 		"Mode":				"Output",
 		"Data Bit":			0,
@@ -374,7 +374,7 @@
 	{
 	"Thread": "Servo",
 	"Type": "Digital Pin",
-		"Comment":			"OT02",
+		"Comment":			"OT02 - Spindle Output 2 (REV)",
 		"Pin":				"P3_13",
 		"Mode":				"Output",
 		"Data Bit":			1,
