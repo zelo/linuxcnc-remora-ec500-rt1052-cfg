@@ -105,7 +105,7 @@ addf scale.0 servo-thread     # Add scaling component to servo thread
 addf abs.0 servo-thread       # Add absolute value component to servo thread
 
 # Configure scaling for spindle RPM to voltage
-setp scale.0.gain 0.00416666667   # Gain for RPM to voltage scaling (e.g., 24000 RPM = 10V)
+setp scale.0.gain 0.00416666667   # <MAX VOLTAGE> / <MAX RPM> = 10 / 24000 = 0.00416666667
 
 # Map spindle speed command to scaled output
 net spindle-cmd-rpm spindle.0.speed-out => scale.0.in       # Map spindle speed to scaling input

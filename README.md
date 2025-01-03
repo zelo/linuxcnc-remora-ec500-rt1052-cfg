@@ -26,6 +26,7 @@ Axis moves on slower speed but when movement is sharper and/or direction change 
 ### Cause
 
 [guess] linuxcnc or remora can't keep up with position tracking.
+More details here: http://wiki.linuxcnc.org/cgi-bin/wiki.pl?Following_Error under `Following Error and Stepper Driven Machines`
 
 ### Solution
 
